@@ -12,4 +12,12 @@
 ./install-dotfiles.sh
 ./install-hyprland-overrides.sh
 
+# Additional applications
+./install-google-chrome.sh
+./install-github-desktop.sh
+./install-signal.sh
+./install-antigravity.sh
+./install-zed.sh
+./install-slack.sh
+
 ./set-shell.sh
