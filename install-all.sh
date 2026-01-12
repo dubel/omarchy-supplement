@@ -20,4 +20,6 @@
 ./install-zed.sh
 ./install-slack.sh
 
+# Omarchy theme customization
+./install-synthwave84-theme.sh
 ./set-shell.sh
