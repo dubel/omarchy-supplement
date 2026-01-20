@@ -54,8 +54,12 @@ if [ -d "$HOME/.config/chromium" ]; then
     mv "$HOME/.config/chromium" "$HOME/.config/chromium.backup"
 fi
 
+#rsync is faster than cp
+echo "Syncing Google Chrome config to Chromium..."
+rsync -a --delete "$HOME/.config/google-chrome/" "$HOME/.config/chromium/"
+
 # Copy Chrome config to Chromium
-cp -aT "$HOME/.config/google-chrome" "$HOME/.config/chromium"
+# cp -aT "$HOME/.config/google-chrome" "$HOME/.config/chromium"
 
 echo "Done! Chrome configuration has been synced to Chromium."
 echo ""
