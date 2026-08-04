@@ -21,5 +21,9 @@ omarchy-webapp-install "Notes" "https://www.icloud.com/notes" ""
 echo "  -> iCloud Drive"
 omarchy-webapp-install "iCloud Drive" "https://www.icloud.com/iclouddrive" ""
 
+# Google Calendar
+echo "  -> Google Calendar"
+omarchy-webapp-install "Google Calendar" "https://calendar.google.com" ""
+
 echo ""
 echo "Web apps installed! Available via launcher (SUPER + SPACE)."
