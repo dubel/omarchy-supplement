@@ -1,15 +1,10 @@
 #!/bin/bash
 
-# Install all packages in order
+# Development tools
 ./install-zsh.sh
-# ./install-asdf.sh
 ./install-nodejs.sh
-# ./install-ruby.sh
-# ./install-postgresql.sh
-# ./install-ghostty.sh
+./install-postgresql.sh
 ./install-tmux.sh
-./install-stow.sh
-./install-dotfiles.sh
 ./install-hyprland-overrides.sh
 
 # Additional applications

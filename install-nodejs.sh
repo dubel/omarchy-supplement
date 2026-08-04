@@ -1,21 +1,18 @@
 #!/bin/bash
 
-# Check if asdf is installed
-if ! command -v asdf &>/dev/null; then
-    echo "asdf is not installed. Please run ./install-asdf.sh first."
+# Install Node.js 20 LTS using mise (Omarchy's built-in runtime manager).
+#
+# This script is idempotent - mise use -g is a no-op if the version
+# is already installed and set globally.
+
+set -e
+
+if ! command -v mise &>/dev/null; then
+    echo "mise is not installed. Please ensure you are running Omarchy."
     exit 1
 fi
 
-# Install nodejs build dependencies
-yay -S --noconfirm --needed base-devel openssl zlib
+echo "Installing Node.js 20 LTS via mise..."
+mise use -g node@20
 
-# Install nodejs plugin for asdf if not already installed
-if ! asdf plugin list | grep -q nodejs; then
-    asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git
-fi
-
-# Install latest LTS nodejs if no nodejs version is installed
-if ! asdf list nodejs &>/dev/null || [ -z "$(asdf list nodejs 2>/dev/null)" ]; then
-    asdf install nodejs latest:20
-    asdf set -u nodejs latest:20
-fi
+echo "Node.js setup complete: $(node --version)"
