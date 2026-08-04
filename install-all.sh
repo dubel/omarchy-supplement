@@ -28,5 +28,6 @@
 
 # Omarchy theme customization
 ./install-synthwave84-theme.sh
+./install-waybar-config.sh
 ./set-shell.sh
 ./set-nightlight.sh

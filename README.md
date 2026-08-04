@@ -52,6 +52,7 @@ Configures a **Framework 13 (AMD Ryzen AI 7 350 + Radeon 860M)** for gaming:
 
 ### 5. Desktop Customization
 - **Theme:** Downloads a custom milky way wallpaper and installs the Synthwave84 Omarchy theme.
+- **Waybar:** Restores customized upper ribbon (Waybar) configurations (e.g., custom date/time format).
 - **Nightlight:** Configures `sunsetr` for a fixed schedule (21:00 to 07:00 at 5500K warmth).
 
 ## Note on Configs (Dotfiles)
