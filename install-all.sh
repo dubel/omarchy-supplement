@@ -13,7 +13,7 @@
 ./install-hyprland-overrides.sh
 
 # Additional applications
-./install-google-chrome.sh
+./setup-chromium-google-account.sh
 ./install-github-desktop.sh
 ./install-signal.sh
 ./install-antigravity.sh
