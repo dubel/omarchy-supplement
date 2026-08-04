@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Install Omarchy Synthwave84 theme
-echo "Installing Synthwave84 theme for Omarchy..."
-omarchy-theme-install https://github.com/omacom-io/omarchy-synthwave84-theme.git
 
 # Download custom wallpaper
 WALLPAPER_DIR="$HOME/.config/omarchy/themes/synthwave84/backgrounds"
@@ -26,4 +23,10 @@ else
 fi
 
 echo "Wallpaper downloaded to: $WALLPAPER_DIR/$WALLPAPER_FILE"
+
+# Install Omarchy Synthwave84 theme
+echo "Installing Synthwave84 theme for Omarchy..."
+omarchy-theme-install https://github.com/omacom-io/omarchy-synthwave84-theme.git
+
 echo "Synthwave84 theme installation complete!"
+
