@@ -17,6 +17,7 @@
 ./install-github-desktop.sh
 ./install-signal.sh
 ./install-antigravity.sh
+./install-antigravity-ide.sh
 ./install-zed.sh
 ./install-slack.sh
 
