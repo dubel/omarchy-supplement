@@ -23,3 +23,4 @@
 # Omarchy theme customization
 ./install-synthwave84-theme.sh
 ./set-shell.sh
+./set-nightlight.sh
