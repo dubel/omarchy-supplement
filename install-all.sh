@@ -21,6 +21,9 @@
 ./install-zed.sh
 ./install-slack.sh
 
+# Gaming (Framework 13 AMD)
+./install-gaming-related-tools.sh
+
 # Omarchy theme customization
 ./install-synthwave84-theme.sh
 ./set-shell.sh
