@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Development tools
+./install-dev-tools.sh
 ./install-zsh.sh
 ./install-nodejs.sh
 ./install-postgresql.sh
