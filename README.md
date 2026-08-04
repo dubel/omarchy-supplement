@@ -24,6 +24,8 @@ cd ~/Documents/GitHub/omarchy-supplement
 The `./install-all.sh` script automates the setup of the following categories:
 
 ### 1. Development Tools
+- **Dev Tools & IDEs:** Installs Goland, VS Code, Lazydocker, Lazygit, and Docker Compose.
+- **IDE Configurations:** Installs JetBrains keybindings and enforces baseline JSON configurations (Solarized Dark theme + custom 'close all other editors' shortcut on `ctrl+shift+f12`) for both VS Code and Antigravity IDE.
 - **Zsh:** Changes default shell to Zsh.
 - **Node.js:** Installs Node LTS (v20) using Omarchy's built-in `mise`.
 - **PostgreSQL:** Installs, initializes the data directory, enables the service, and creates a default DB/user.

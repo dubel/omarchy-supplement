@@ -14,6 +14,7 @@
 ./install-signal.sh
 ./install-antigravity.sh
 ./install-antigravity-ide.sh
+./install-ide-configs.sh
 ./install-zed.sh
 ./install-slack.sh
 ./install-teams.sh
