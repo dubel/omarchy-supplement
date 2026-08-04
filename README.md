@@ -33,7 +33,8 @@ The `./install-all.sh` script automates the setup of the following categories:
 - **Hyprland Overrides:** Injects custom input configurations and keybinds (`hyprland-overrides.conf`).
 
 ### 2. Applications
-- **Chromium:** Configures Chromium to allow Google Account sync using Omarchy's OAuth flags.
+- **Chromium:** Configures Chromium to allow Google Account sync using Omarchy's OAuth flags (interactive).
+- **GitHub CLI:** Installs `gh`, performs interactive web login to securely configure Git (replaces `~/.netrc`).
 - **Tools:** GitHub Desktop, Signal, Zed, Slack, Microsoft Teams, and Antigravity IDE.
 
 ### 3. Web Apps

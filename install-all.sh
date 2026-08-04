@@ -10,6 +10,7 @@
 
 # Additional applications
 ./setup-chromium-google-account.sh
+./setup-github-auth.sh
 ./install-github-desktop.sh
 ./install-signal.sh
 ./install-antigravity.sh
