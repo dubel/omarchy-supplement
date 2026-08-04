@@ -21,6 +21,9 @@
 ./install-zed.sh
 ./install-slack.sh
 
+# Web apps (launcher shortcuts)
+./install-webapps.sh
+
 # Gaming (Framework 13 AMD)
 ./install-gaming-related-tools.sh
 
