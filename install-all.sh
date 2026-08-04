@@ -15,6 +15,7 @@
 ./install-antigravity-ide.sh
 ./install-zed.sh
 ./install-slack.sh
+./install-teams.sh
 
 # Web apps (launcher shortcuts)
 ./install-webapps.sh
