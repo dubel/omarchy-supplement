@@ -4,6 +4,7 @@
 ./install-dev-tools.sh
 ./install-zsh.sh
 ./install-nodejs.sh
+./install-golang.sh
 ./install-postgresql.sh
 ./install-tmux.sh
 ./install-hyprland-overrides.sh
