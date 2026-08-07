@@ -3,6 +3,7 @@
 # Development tools
 ./install-dev-tools.sh
 ./install-zsh.sh
+./install-oh-my-zsh.sh
 ./install-nodejs.sh
 ./install-golang.sh
 ./install-postgresql.sh
