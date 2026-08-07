@@ -10,6 +10,7 @@ echo "Installing JetBrains keybindings for VS Code and Antigravity IDE..."
 for cmd in code antigravity-ide; do
     if command -v "$cmd" &>/dev/null; then
         "$cmd" --install-extension k--kato.intellij-idea-keybindings --force
+        "$cmd" --install-extension RobbOwen.synthwave-vscode --force
     fi
 done
 
