@@ -33,5 +33,5 @@
 ./install-waybar-config.sh
 ./set-shell.sh
 ./set-nightlight.sh
-./configure-idle-timeout.sh
+./configure-idle-behavior.sh
 ./configure-screensaver.sh
