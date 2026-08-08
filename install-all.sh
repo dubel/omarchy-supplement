@@ -34,3 +34,4 @@
 ./set-shell.sh
 ./set-nightlight.sh
 ./disable-idle-lock.sh
+./configure-screensaver.sh
