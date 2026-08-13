@@ -35,3 +35,4 @@
 ./set-nightlight.sh
 ./configure-idle-behavior.sh
 ./configure-screensaver.sh
+./set-splash.sh
