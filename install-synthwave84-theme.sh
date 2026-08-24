@@ -1,8 +1,15 @@
 #!/bin/bash
 
 
-# Download custom wallpaper
-WALLPAPER_DIR="$HOME/.config/omarchy/themes/synthwave84/backgrounds"
+# Install Omarchy Synthwave84 theme first (this sets up the theme directory)
+echo "Installing Synthwave84 theme for Omarchy..."
+omarchy-theme-install https://github.com/omacom-io/omarchy-synthwave84-theme.git
+
+echo "Synthwave84 theme installation complete!"
+
+# Download custom wallpaper to the user backgrounds directory
+# (the selector looks in ~/.config/omarchy/backgrounds/<theme>/, not in the theme source)
+WALLPAPER_DIR="$HOME/.config/omarchy/backgrounds/synthwave84"
 WALLPAPER_URL="https://dubel.dev/images/milky_way_galaxy_2-wallpaper-2880x1920.jpg"
 WALLPAPER_FILE="milky_way_galaxy_2-wallpaper-2880x1920.jpg"
 
@@ -24,10 +31,4 @@ else
     fi
     echo "Wallpaper downloaded to: $WALLPAPER_DIR/$WALLPAPER_FILE"
 fi
-
-# Install Omarchy Synthwave84 theme
-echo "Installing Synthwave84 theme for Omarchy..."
-omarchy-theme-install https://github.com/omacom-io/omarchy-synthwave84-theme.git
-
-echo "Synthwave84 theme installation complete!"
 
