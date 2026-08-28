@@ -48,12 +48,12 @@ fi
 # We inject a call into autostart.lua to disable idle on boot.
 if [ -f "$AUTOSTART_LUA" ]; then
     DISABLE_MARKER="-- Disable idle on boot (omarchy-supplement)"
-    if ! grep -q "$DISABLE_MARKER" "$AUTOSTART_LUA"; then
+    if ! grep -qF -- "$DISABLE_MARKER" "$AUTOSTART_LUA"; then
         echo "" >> "$AUTOSTART_LUA"
         echo "$DISABLE_MARKER" >> "$AUTOSTART_LUA"
         # Use os.execute to run the toggle-idle command after a delay
         # This gives the shell time to start before we try to disable idle
-        echo 'o.exec_once("bash -c \\'sleep 3 && omarchy-toggle-idle off 2>/dev/null || true\\'")' >> "$AUTOSTART_LUA"
+        echo 'o.launch_on_start("bash -c '\''sleep 3 && omarchy-toggle-idle off 2>/dev/null || true'\''")' >> "$AUTOSTART_LUA"
         echo "Added idle-disable autostart entry to $AUTOSTART_LUA"
     else
         echo "Idle-disable autostart entry already exists in $AUTOSTART_LUA"
