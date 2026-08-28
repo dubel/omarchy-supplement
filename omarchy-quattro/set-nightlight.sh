@@ -1,11 +1,9 @@
 #!/bin/bash
 
 # Configure nightlight for Omarchy Quattro.
-# Quattro uses hyprsunset instead of sunsetr for nightlight control.
-# This script detects which tool is available and configures accordingly.
-#
-# If sunsetr is still available, it will be used (backward-compatible).
-# If only hyprsunset is available, it configures via shell.toml.
+# Quattro uses omarchy-toggle-nightlight (wrapping hyprsunset) for nightlight.
+# This script enables nightlight immediately and optionally configures sunsetr
+# as a fallback if hyprsunset is not available.
 
 set -e
 
@@ -17,9 +15,36 @@ DAY_TEMP=6500
 SUNSET="21:00"
 SUNRISE="07:00"
 
-# Check which nightlight tool is available
-if command -v sunsetr &>/dev/null; then
-    echo "Using sunsetr for nightlight configuration..."
+# Quattro's native nightlight is omarchy-toggle-nightlight, which wraps hyprsunset.
+# sunsetr may be installed but is NOT what Quattro uses for the toggle widget.
+if command -v omarchy-toggle-nightlight &>/dev/null; then
+    echo "Using Quattro's built-in nightlight (omarchy-toggle-nightlight / hyprsunset)..."
+
+    # Enable nightlight now
+    omarchy-toggle-nightlight 2>/dev/null || true
+    sleep 0.5
+
+    # Check if it's actually on; if the toggle turned it off, toggle again
+    STATUS=$(omarchy-toggle-nightlight --status 2>/dev/null || echo '{}')
+    ENABLED=$(echo "$STATUS" | grep -o '"enabled":true' || true)
+    if [ -z "$ENABLED" ]; then
+        omarchy-toggle-nightlight 2>/dev/null || true
+        sleep 0.5
+    fi
+
+    echo "Nightlight enabled via omarchy-toggle-nightlight."
+    echo "Current status:"
+    omarchy-toggle-nightlight --status 2>/dev/null || echo "  (could not query status)"
+
+    # Note: hyprsunset's default ON temp is 4000K. To change it, the
+    # omarchy-toggle-nightlight script would need to be overridden.
+    # The temperature can also be set directly:
+    #   hyprctl hyprsunset temperature 3300
+    echo ""
+    echo "Tip: Use SUPER+CTRL+N to toggle nightlight, or the bar widget."
+
+elif command -v sunsetr &>/dev/null; then
+    echo "Falling back to sunsetr for nightlight configuration..."
 
     CONFIG_DIR="$HOME/.config/sunsetr"
     mkdir -p "$CONFIG_DIR"
@@ -43,41 +68,8 @@ if command -v sunsetr &>/dev/null; then
     echo "Current status:"
     sunsetr status
 
-elif command -v hyprsunset &>/dev/null; then
-    echo "Using hyprsunset for nightlight configuration..."
-
-    # hyprsunset is Quattro's built-in nightlight, configured through shell.toml
-    SHELL_TOML="$HOME/.config/omarchy/shell.toml"
-    SHELL_TOML_DIR="$(dirname "$SHELL_TOML")"
-    mkdir -p "$SHELL_TOML_DIR"
-
-    # Helper function to set a value in shell.toml
-    set_toml_value() {
-        local key="$1"
-        local value="$2"
-        if [ -f "$SHELL_TOML" ] && grep -q "^${key}" "$SHELL_TOML"; then
-            sed -i "s|^${key}.*|${key} = ${value}|" "$SHELL_TOML"
-        else
-            echo "${key} = ${value}" >> "$SHELL_TOML"
-        fi
-    }
-
-    set_toml_value "nightlight_temp" "$NIGHT_TEMP"
-    set_toml_value "nightlight_sunset" "\"$SUNSET\""
-    set_toml_value "nightlight_sunrise" "\"$SUNRISE\""
-
-    echo "Nightlight configured via hyprsunset/shell.toml: ${NIGHT_TEMP}K from ${SUNSET} to ${SUNRISE}"
-
-    # Restart hyprsunset to pick up changes
-    if command -v omarchy-restart-hyprsunset &>/dev/null; then
-        omarchy-restart-hyprsunset
-        echo "hyprsunset restarted with new settings."
-    fi
-
-    echo "Tip: You can also toggle nightlight from the bar's widget menu."
-
 else
-    echo "Error: Neither sunsetr nor hyprsunset found."
+    echo "Error: Neither omarchy-toggle-nightlight nor sunsetr found."
     echo "Please verify your Omarchy Quattro installation."
     exit 1
 fi
