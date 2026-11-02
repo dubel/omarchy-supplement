@@ -218,6 +218,17 @@ if ! grep -q "Omarchy CLI Aliases" "$ZSHRC"; then
     echo "$CLI_ALIASES" >> "$ZSHRC"
 fi
 
+# ~/.local/bin on PATH (Claude Code native installer and other user-level CLIs live there).
+# Without it `claude` is not found in Alacritty / tmux once this script rewrites .zshrc.
+LOCAL_BIN_PATH='
+# User-level binaries (Claude Code native installer -> ~/.local/bin)
+export PATH="$HOME/.local/bin:$PATH"
+'
+
+if ! grep -q 'export PATH="$HOME/.local/bin:$PATH"' "$ZSHRC"; then
+    echo "$LOCAL_BIN_PATH" >> "$ZSHRC"
+fi
+
 # Safe Auto-start Tmux
 AUTOSTART_SNIPPET='
 # Auto-start Tmux (Omarchy style)
@@ -256,6 +267,29 @@ set -g renumber-windows on    # Renumber windows when one is closed
 # Modern colors
 set -g default-terminal "tmux-256color"
 set -ag terminal-overrides ",xterm-256color:RGB"
+
+# Prefix: Ctrl+Space (like Omarchy), Ctrl+b kept as a fallback
+# Note: if macOS uses Ctrl+Space to switch input sources, disable that in
+# System Settings > Keyboard > Keyboard Shortcuts > Input Sources.
+set -g prefix C-Space
+set -g prefix2 C-b
+bind C-Space send-prefix
+
+# Alt+1..9 -> switch to window N (like Omarchy, no prefix needed)
+bind -n M-1 select-window -t 1
+bind -n M-2 select-window -t 2
+bind -n M-3 select-window -t 3
+bind -n M-4 select-window -t 4
+bind -n M-5 select-window -t 5
+bind -n M-6 select-window -t 6
+bind -n M-7 select-window -t 7
+bind -n M-8 select-window -t 8
+bind -n M-9 select-window -t 9
+
+# Splits: prefix + | (side by side), prefix + - (stacked), open in current dir
+bind | split-window -h -c "#{pane_current_path}"
+bind - split-window -v -c "#{pane_current_path}"
+bind c new-window -c "#{pane_current_path}"
 
 # 2. Tmux Plugin Manager (TPM)
 set -g @plugin 'tmux-plugins/tpm'
@@ -308,6 +342,8 @@ padding.y = 14
 decorations = "Buttonless"
 opacity = 0.95
 blur = true
+# Left Option = Alt (for tmux Alt+1..9); right Option still types Polish letters
+option_as_alt = "OnlyLeft"
 
 [terminal]
 shell.program = "$CURRENT_ZSH"
@@ -407,4 +443,9 @@ echo " 1. Launch 'Alacritty' from Spotlight (Cmd + Space) or Applications."
 echo " 2. Tmux will automatically start with the Dracula status bar at the top."
 echo " 3. Powerlevel10k prompt and autosuggestions / syntax-highlighting are active."
 echo ""
-echo "Tip: If you ever update tmux plugins manually, press: 'Ctrl+b' then 'I' (capital I)."
+echo "Tmux shortcuts (prefix = Ctrl+Space, Ctrl+b also works):"
+echo "  Left Option + 1..9   switch to window N"
+echo "  prefix, c            new window"
+echo "  prefix, | / -        split side by side / stacked"
+echo "  prefix, z            zoom pane;  prefix, & / x   close window / pane"
+echo "  prefix, I            install/update tmux plugins"
