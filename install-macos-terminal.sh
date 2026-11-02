@@ -68,10 +68,37 @@ elif [[ -f "/usr/local/bin/brew" ]]; then
     eval "$(/usr/local/bin/brew shellenv)"
 fi
 
-# 3. Install Core CLI Packages & Alacritty Terminal
-info "Installing Alacritty, Tmux, and modern CLI tools..."
+# 3. Install Core CLI Packages
+info "Installing Tmux and modern CLI tools..."
 brew install tmux git curl eza bat zoxide fzf
-brew install --cask alacritty
+
+# 3b. Install Alacritty via Official GitHub Release DMG
+# Note: Homebrew disabled the 'alacritty' cask due to Gatekeeper notarization rules.
+# We download the official DMG directly and strip quarantine flags so it opens cleanly.
+if [[ ! -d "/Applications/Alacritty.app" ]]; then
+    info "Installing Alacritty directly from official GitHub release..."
+    DMG_URL=$(curl -s https://api.github.com/repos/alacritty/alacritty/releases/latest | grep -o 'https://[^"]*Alacritty-[^"]*\.dmg' | head -n 1)
+    if [[ -z "$DMG_URL" ]]; then
+        DMG_URL="https://github.com/alacritty/alacritty/releases/download/v0.17.0/Alacritty-v0.17.0.dmg"
+    fi
+    TMP_DMG="/tmp/Alacritty.dmg"
+    MOUNT_DIR="/tmp/Alacritty_Mount"
+
+    echo "  -> Downloading $DMG_URL..."
+    curl -fLo "$TMP_DMG" "$DMG_URL"
+    mkdir -p "$MOUNT_DIR"
+    hdiutil attach -nobrowse -mountpoint "$MOUNT_DIR" "$TMP_DMG"
+    cp -R "$MOUNT_DIR/Alacritty.app" /Applications/
+    hdiutil detach "$MOUNT_DIR" 2>/dev/null || hdiutil detach -force "$MOUNT_DIR" || true
+    rm -f "$TMP_DMG"
+    rmdir "$MOUNT_DIR" 2>/dev/null || true
+
+    # Strip quarantine attribute to allow flawless launch without Gatekeeper blocking
+    xattr -cr /Applications/Alacritty.app 2>/dev/null || true
+    success "Alacritty.app installed to /Applications/Alacritty.app."
+else
+    info "Alacritty.app is already present in /Applications/."
+fi
 
 # 4. Install MesloLGS NF Fonts (Required by Powerlevel10k)
 info "Installing MesloLGS NF fonts for Powerlevel10k into ~/Library/Fonts/..."
@@ -337,6 +364,38 @@ white = "#ffffff"
 EOF
 
 success "Alacritty configuration saved to $ALACRITTY_DIR/alacritty.toml."
+
+# 12. Also configure Ghostty (if installed or used in the future)
+GHOSTTY_DIR="$HOME/.config/ghostty"
+mkdir -p "$GHOSTTY_DIR"
+cat << EOF > "$GHOSTTY_DIR/config"
+# Ghostty Configuration - Omarchy Synthwave84 Theme (macOS)
+font-family = "MesloLGS NF"
+font-size = 14
+window-padding-x = 14
+window-padding-y = 14
+background = #240037
+foreground = #ffffff
+cursor-color = #ffffff
+cursor-text = #240037
+palette = 0=#240037
+palette = 1=#ff0040
+palette = 2=#8f00ff
+palette = 3=#f3e70f
+palette = 4=#0080ff
+palette = 5=#ff00ff
+palette = 6=#03edf9
+palette = 7=#ffffff
+palette = 8=#614d85
+palette = 9=#fe5442
+palette = 10=#fe5442
+palette = 11=#ffff66
+palette = 12=#0080ff
+palette = 13=#ff7edb
+palette = 14=#03edf9
+palette = 15=#ffffff
+EOF
+success "Ghostty configuration saved to $GHOSTTY_DIR/config."
 
 echo ""
 echo -e "${GREEN}====================================================${NC}"
