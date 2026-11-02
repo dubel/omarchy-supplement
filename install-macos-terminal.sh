@@ -32,9 +32,13 @@ error() {
     exit 1
 }
 
-# 1. OS Check
+# 1. OS & User Check
 if [[ "$(uname -s)" != "Darwin" ]]; then
     error "This script is intended exclusively for macOS."
+fi
+
+if [[ $EUID -eq 0 ]]; then
+    error "Please do NOT run this script with sudo. Run it as your regular user: bash -c \"\$(curl -fsSL ...)\""
 fi
 
 echo -e "${GREEN}====================================================${NC}"

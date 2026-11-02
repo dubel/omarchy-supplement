@@ -65,8 +65,8 @@ To reproduce the Omarchy terminal feel (Alacritty + Synthwave84 theme, Powerleve
 # Option A: From this cloned repo on macOS
 ./install-macos-terminal.sh
 
-# Option B: One-liner on a fresh Mac
-curl -fsSL https://raw.githubusercontent.com/dubel/omarchy-supplement/main/install-macos-terminal.sh | bash
+# Option B: One-liner on a fresh Mac (do NOT run with sudo!)
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/dubel/omarchy-supplement/main/install-macos-terminal.sh)"
 ```
 
 ## Note on Configs (Dotfiles)
