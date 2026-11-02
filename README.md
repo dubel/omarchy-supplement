@@ -57,6 +57,19 @@ Configures a **Framework 13 (AMD Ryzen AI 7 350 + Radeon 860M)** for gaming:
 - **Waybar:** Restores customized upper ribbon (Waybar) configurations (e.g., custom date/time format).
 - **Nightlight:** Configures `sunsetr` for a fixed schedule (21:00 to 07:00 at 5500K warmth).
 
+## macOS Terminal Replicator
+
+To reproduce the Omarchy terminal feel (Alacritty + Synthwave84 theme, Powerlevel10k, Dracula Tmux top bar, and modern CLI tools) on macOS:
+
+```bash
+# Option A: From this cloned repo on macOS
+./install-macos-terminal.sh
+
+# Option B: One-liner on a fresh Mac
+curl -fsSL https://raw.githubusercontent.com/dubel/omarchy-supplement/main/install-macos-terminal.sh | bash
+```
+
 ## Note on Configs (Dotfiles)
 
 Instead of using `stow` and a separate dotfiles repository, this setup relies directly on **Omarchy's built-in configuration management** (`omarchy-refresh-config`). Customizations specific to this machine (like keyboard layouts, scroll speeds) are handled in `hyprland-overrides.conf`.
+
