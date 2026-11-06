@@ -70,7 +70,7 @@ fi
 
 # 3. Install Core CLI Packages
 info "Installing Tmux and modern CLI tools..."
-brew install tmux git curl eza bat zoxide fzf
+brew install tmux git curl eza bat zoxide fzf dockutil
 
 # 3b. Install Alacritty via Official GitHub Release DMG
 # Note: Homebrew disabled the 'alacritty' cask due to Gatekeeper notarization rules.
@@ -339,7 +339,7 @@ size = 14
 [window]
 padding.x = 14
 padding.y = 14
-decorations = "Buttonless"
+decorations = "Full"
 opacity = 0.95
 blur = true
 # Left Option = Alt (for tmux Alt+1..9); right Option still types Polish letters
@@ -432,6 +432,17 @@ palette = 14=#03edf9
 palette = 15=#ffffff
 EOF
 success "Ghostty configuration saved to $GHOSTTY_DIR/config."
+
+# 13. Pin Alacritty to the Dock (macOS has no "default terminal" setting,
+# so keeping it in the Dock is the practical equivalent)
+if defaults read com.apple.dock persistent-apps 2>/dev/null | grep -q 'Alacritty.app'; then
+    info "Alacritty is already pinned to the Dock."
+elif command -v dockutil &>/dev/null; then
+    info "Pinning Alacritty to the Dock..."
+    dockutil --add /Applications/Alacritty.app --section apps || warn "Could not pin Alacritty to the Dock."
+else
+    warn "dockutil not found, skipping Dock pinning."
+fi
 
 echo ""
 echo -e "${GREEN}====================================================${NC}"
