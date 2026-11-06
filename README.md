@@ -69,6 +69,42 @@ To reproduce the Omarchy terminal feel (Alacritty + Synthwave84 theme, Powerleve
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/dubel/omarchy-supplement/main/install-macos-terminal.sh)"
 ```
 
+Besides the theme, the installer also adds `~/.local/bin` to `PATH` (so the Claude Code native install is found), pins Alacritty to the Dock, and gives Alacritty a standard macOS title bar. The script is safe to re-run, but it overwrites `~/.tmux.conf`, `~/.config/alacritty/alacritty.toml` and the Ghostty config, so put any custom changes into the script.
+
+### Tmux shortcuts
+
+The prefix is **`Ctrl+Space`** (like Omarchy); `Ctrl+b` works as a fallback. Press the prefix, release it, then press the key.
+
+| Action | Shortcut |
+|---|---|
+| Switch to window 1..9 | **Left `Option` + `1`..`9`** (no prefix) or prefix, `1`..`9` |
+| New window (opens in the current directory) | prefix, `c` |
+| Next / previous window | prefix, `n` / `p` |
+| Split side by side | prefix, `\|` (default `%` also works) |
+| Split stacked (top / bottom) | prefix, `-` (default `"` also works) |
+| Move between panes | prefix, arrow keys, or click with the mouse |
+| Resize pane | prefix, `Ctrl` + arrow keys, or drag the border with the mouse |
+| Zoom pane in / out | prefix, `z` |
+| Close pane / window | `exit` or `Ctrl+d`; prefix, `x` (pane) or `&` (window) |
+| New named session | prefix, `:`, then `new -s <name>` |
+| List and switch sessions / windows | prefix, `s` / `w` |
+| Detach (session keeps running) | prefix, `d` |
+| Install / update tmux plugins | prefix, `I` |
+
+Notes:
+- Opening Alacritty attaches to the `main` tmux session. Exiting or detaching tmux closes the Alacritty window.
+- Only the **left** `Option` key acts as Alt in Alacritty. Use the **right** `Option` key to type Polish characters (ą, ę, ś, ...).
+- If `Ctrl+Space` does nothing, macOS is probably using it to switch input sources. Disable that in **System Settings → Keyboard → Keyboard Shortcuts → Input Sources**.
+
+### Alacritty window shortcuts
+
+| Action | Shortcut |
+|---|---|
+| Toggle full screen | `Cmd+Ctrl+F` |
+| Fill the screen (macOS window tiling) | `Fn+Ctrl+F` |
+| Left / right half of the screen | `Fn+Ctrl+←` / `Fn+Ctrl+→` |
+| Restore previous size | `Fn+Ctrl+R` |
+
 ## Note on Configs (Dotfiles)
 
 Instead of using `stow` and a separate dotfiles repository, this setup relies directly on **Omarchy's built-in configuration management** (`omarchy-refresh-config`). Customizations specific to this machine (like keyboard layouts, scroll speeds) are handled in `hyprland-overrides.conf`.
