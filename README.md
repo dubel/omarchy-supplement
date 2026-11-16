@@ -32,7 +32,7 @@ The `./install-all.sh` script automates setup across the following categories:
 - **Golang:** Installs the latest version of Go using Omarchy's built-in `mise`.
 - **PostgreSQL:** Installs, initializes the data directory, enables the service, and creates a default DB/user non-interactively.
 - **Tmux:** Restores tmux configurations with TPM and auto-start logic for Zsh.
-- **Hyprland Overrides:** Injects custom input configurations and keybinds using the Omarchy 4.x Lua API (`hyprland-overrides.lua`).
+- **Hyprland Overrides:** Injects custom input configurations, touchpad gestures, and keybinds using the Omarchy 4.x Lua API (`hyprland-overrides.lua`).
 
 ### 2. Applications
 - **Chromium:** Configures Chromium to allow Google Account sync using Omarchy's OAuth flags.
@@ -58,6 +58,12 @@ Configures a **Framework 13 (AMD Ryzen AI 7 350 + Radeon 860M)** for gaming:
 - **Nightlight:** Configures `hyprsunset` for a fixed schedule (21:00 to 07:00 at 3300K warmth).
 - **Screensaver:** Configures infinite Matrix rain via `ttfx` while retaining full Omarchy cursor and dismissal handling.
 - **Idle Behavior:** Sets 30-minute lock timeout and boots into stay-awake mode.
+- **Browser Shortcuts (macOS-style):** When focused on Chromium or Google Chrome:
+  - `SUPER + T` $\rightarrow$ opens a new tab (`Ctrl + T`)
+  - `SUPER + W` $\rightarrow$ closes current tab (`Ctrl + W`)
+  - `SUPER + SHIFT + T` $\rightarrow$ reopens closed tab (`Ctrl + Shift + T`)
+  - `SUPER + Q` $\rightarrow$ closes the entire browser window (Omarchy default)
+  In all other applications, system defaults (window tiling/float, window close) remain untouched.
 
 ## macOS Terminal Replicator
 
@@ -70,6 +76,46 @@ To reproduce the Omarchy terminal feel (Alacritty + Synthwave84 theme, Powerleve
 # Option B: One-liner on a fresh Mac (do NOT run with sudo!)
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/dubel/omarchy-supplement/main/install-macos-terminal.sh)"
 ```
+
+Besides the theme, the installer also adds `~/.local/bin` to `PATH` (so the Claude Code native install is found), pins Alacritty to the Dock, and gives Alacritty a standard macOS title bar. The script is safe to re-run, but it overwrites `~/.tmux.conf`, `~/.config/alacritty/alacritty.toml` and the Ghostty config, so put any custom changes into the script.
+
+### Tmux shortcuts
+
+The prefix is **`Ctrl+Space`** (like Omarchy); `Ctrl+b` works as a fallback. Press the prefix, release it, then press the key.
+
+| Action | Shortcut |
+|---|---|
+| Switch to window 1..9 | **Left `Option` + `1`..`9`** (no prefix) or prefix, `1`..`9` |
+| New window (opens in the current directory) | prefix, `c` |
+| Next / previous window | prefix, `n` / `p` |
+| Split side by side | prefix, `\|` (default `%` also works) |
+| Split stacked (top / bottom) | prefix, `-` (default `"` also works) |
+| Move between panes | prefix, arrow keys, or click with the mouse |
+| Resize pane | prefix, `Ctrl` + arrow keys, or drag the border with the mouse |
+| Zoom pane in / out | prefix, `z` |
+| Close pane / window | `exit` or `Ctrl+d`; prefix, `x` (pane) or `&` (window) |
+| New named session | prefix, `:`, then `new -s <name>` |
+| List and switch sessions / windows | prefix, `s` / `w` |
+| Detach (session keeps running) | prefix, `d` |
+| Install / update tmux plugins | prefix, `I` |
+
+Notes:
+- Opening Alacritty attaches to the `main` tmux session. Exiting or detaching tmux closes the Alacritty window.
+- Only the **left** `Option` key acts as Alt in Alacritty. Use the **right** `Option` key to type Polish characters (ą, ę, ś, ...).
+- If `Ctrl+Space` does nothing, macOS is probably using it to switch input sources. Disable that in **System Settings → Keyboard → Keyboard Shortcuts → Input Sources**.
+
+### Alacritty window shortcuts
+
+| Action | Shortcut |
+|---|---|
+| Toggle full screen | `Cmd+Ctrl+F` |
+| Fill the screen (macOS window tiling) | `Fn+Ctrl+F` |
+| Left / right half of the screen | `Fn+Ctrl+←` / `Fn+Ctrl+→` |
+| Restore previous size | `Fn+Ctrl+R` |
+
+## Note on Configs (Dotfiles)
+
+Instead of using `stow` and a separate dotfiles repository, this setup relies directly on **Omarchy's built-in configuration management** (`omarchy-refresh-config`). Customizations specific to this machine (like keyboard layouts, scroll speeds, browser shortcuts) are handled in `hyprland-overrides.lua`.
 
 ## Legacy Scripts
 
