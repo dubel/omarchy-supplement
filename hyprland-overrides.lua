@@ -69,7 +69,7 @@ o.rebind("SUPER + W", "Browser close tab or close window", function()
 end)
 
 -- SUPER + SHIFT + T -> Reopen closed tab in browser (Ctrl+Shift+T)
-o.bind("SUPER + SHIFT + T", "Browser reopen closed tab", function()
+o.rebind("SUPER + SHIFT + T", "Browser reopen closed tab", function()
   if is_browser() then
     send_keys("CTRL SHIFT", "T")
   end
