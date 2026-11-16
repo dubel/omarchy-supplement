@@ -1,22 +1,16 @@
--- Hyprland Lua configuration overrides for Omarchy Quattro
--- Uses the Quattro Lua API: hl.config(), o.bind(), o.window(), hl.gesture()
+-- Hyprland Lua configuration overrides for Omarchy 4.x
+-- Uses the Omarchy Lua API: hl.config(), o.bind(), o.rebind(), o.window(), hl.gesture()
 
 -- Keyboard + touchpad input configuration
 hl.config({
   input = {
     -- Use Polish keyboard layout
-    -- To use multiple layouts with Alt switching, uncomment and adjust:
-    -- kb_layout = "us,dk,eu",
-    -- kb_options = "compose:caps,grp:alts_toggle",
     kb_layout = "pl",
     kb_options = "compose:caps",
 
     -- Keyboard repeat speed
     repeat_rate = 40,
     repeat_delay = 600,
-
-    -- Increase sensitivity for mouse/trackpad (default: 0)
-    -- sensitivity = 0.35,
 
     -- Touchpad settings
     touchpad = {
@@ -35,7 +29,48 @@ hl.config({
 -- Enable touchpad gestures for changing workspaces (3-finger horizontal swipe)
 hl.gesture({ fingers = 3, direction = "horizontal", action = "workspace" })
 
--- Scroll faster in the terminal (Foot is the new default in Quattro)
+-- Scroll faster in the terminal (Foot is default, keep Alacritty as fallback)
 o.window("(foot)", { scroll_touchpad = 1.5 })
--- Keep Alacritty rule too in case it's still installed
 o.window("(Alacritty)", { scroll_touchpad = 1.5 })
+
+-- ==============================================================================
+-- macOS-style browser tab shortcuts for Chromium & Google Chrome
+-- ==============================================================================
+local function send_keys(mods, key)
+  hl.dispatch(hl.dsp.send_key_state({ mods = mods, key = key, state = "down" }))
+  hl.timer(function()
+    hl.dispatch(hl.dsp.send_key_state({ mods = mods, key = key, state = "up" }))
+  end, { timeout = 50, type = "oneshot" })
+end
+
+local function is_browser()
+  local window = hl.get_active_window()
+  local class = ((window and window.class) or ""):lower()
+  return class:match("chromium") or class:match("chrome")
+end
+
+-- SUPER + T -> New tab in browser (Ctrl+T) or toggle floating elsewhere
+o.rebind("SUPER + T", "Browser new tab or toggle float", function()
+  if is_browser() then
+    send_keys("CTRL", "T")
+  else
+    hl.dispatch(hl.dsp.window.float({ action = "toggle" }))
+  end
+end)
+
+-- SUPER + W -> Close tab in browser (Ctrl+W) or close window elsewhere
+-- (Note: SUPER + Q still closes the whole browser window, matching macOS Cmd+Q)
+o.rebind("SUPER + W", "Browser close tab or close window", function()
+  if is_browser() then
+    send_keys("CTRL", "W")
+  else
+    hl.dispatch(hl.dsp.window.close())
+  end
+end)
+
+-- SUPER + SHIFT + T -> Reopen closed tab in browser (Ctrl+Shift+T)
+o.bind("SUPER + SHIFT + T", "Browser reopen closed tab", function()
+  if is_browser() then
+    send_keys("CTRL SHIFT", "T")
+  end
+end)
