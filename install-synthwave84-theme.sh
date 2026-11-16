@@ -1,34 +1,40 @@
 #!/bin/bash
 
+# Install Omarchy Synthwave84 theme for Omarchy 4.x.
+# Uses Omarchy's theme management system and ensures custom wallpaper is placed in backgrounds.
 
-# Install Omarchy Synthwave84 theme first (this sets up the theme directory)
+set -e
+
 echo "Installing Synthwave84 theme for Omarchy..."
-omarchy-theme-install https://github.com/omacom-io/omarchy-synthwave84-theme.git
 
-echo "Synthwave84 theme installation complete!"
+if [ -d "$HOME/.config/omarchy/themes/synthwave84" ]; then
+    echo "Synthwave84 theme directory already exists. Applying theme..."
+    omarchy theme set synthwave84 2>/dev/null || omarchy-theme-set synthwave84 2>/dev/null || true
+else
+    echo "Installing theme from GitHub repository..."
+    omarchy-theme-install https://github.com/omacom-io/omarchy-synthwave84-theme.git
+fi
+
+echo "Synthwave84 theme setup complete!"
 
 # Download custom wallpaper to the user backgrounds directory
-# (the selector looks in ~/.config/omarchy/backgrounds/<theme>/, not in the theme source)
 WALLPAPER_DIR="$HOME/.config/omarchy/backgrounds/synthwave84"
 WALLPAPER_URL="https://dubel.dev/images/milky_way_galaxy_2-wallpaper-2880x1920.jpg"
 WALLPAPER_FILE="milky_way_galaxy_2-wallpaper-2880x1920.jpg"
 
-# Ensure the backgrounds directory exists
 mkdir -p "$WALLPAPER_DIR"
 
-# Download the wallpaper if not already present
 if [ -f "$WALLPAPER_DIR/$WALLPAPER_FILE" ]; then
-    echo "Wallpaper already exists, skipping download."
+    echo "Wallpaper already exists: $WALLPAPER_DIR/$WALLPAPER_FILE"
 else
     echo "Downloading custom wallpaper..."
     if command -v curl &>/dev/null; then
-        curl -L -o "$WALLPAPER_DIR/$WALLPAPER_FILE" "$WALLPAPER_URL"
+        curl -fsSL -o "$WALLPAPER_DIR/$WALLPAPER_FILE" "$WALLPAPER_URL"
     elif command -v wget &>/dev/null; then
-        wget -O "$WALLPAPER_DIR/$WALLPAPER_FILE" "$WALLPAPER_URL"
-    else
-        echo "Error: Neither curl nor wget is available."
-        exit 1
+        wget -q -O "$WALLPAPER_DIR/$WALLPAPER_FILE" "$WALLPAPER_URL"
     fi
     echo "Wallpaper downloaded to: $WALLPAPER_DIR/$WALLPAPER_FILE"
 fi
 
+echo ""
+echo "Theme setup complete! Use 'omarchy theme switcher' or 'omarchy theme bg-switcher' anytime."

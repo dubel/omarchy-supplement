@@ -1,43 +1,57 @@
 #!/bin/bash
 
-# Configure sunsetr (Omarchy's nightlight tool) for a warm screen
-# from 21:00 to 07:00 with 5500K temperature.
-#
-# This script is idempotent - running it multiple times produces the same result.
-# It writes the desired values directly to sunsetr's config file and restarts
-# the service if it's running.
+# Configure scheduled nightlight for Omarchy 4.x (Quattro).
+# Omarchy 4.x natively uses hyprsunset for blue light filtering and screen warmth.
+# Schedules are defined declaratively in ~/.config/hypr/hyprsunset.conf.
 
 set -e
 
-CONFIG_DIR="$HOME/.config/sunsetr"
-CONFIG_FILE="$CONFIG_DIR/sunsetr.toml"
+HYPRSUNSET_CONF="$HOME/.config/hypr/hyprsunset.conf"
+AUTOSTART_LUA="$HOME/.config/hypr/autostart.lua"
 
-# Ensure config directory exists
-mkdir -p "$CONFIG_DIR"
-
-# Desired settings
 NIGHT_TEMP=3300
-DAY_TEMP=6500
-NIGHT_GAMMA=90
-DAY_GAMMA=100
-SUNSET="21:00:00"
-SUNRISE="07:00:00"
-TRANSITION_MODE="finish_by"
-TRANSITION_DURATION=45
+SUNSET="21:00"
+SUNRISE="07:00"
 
-# Update config values using sunsetr set (writes to config file)
-# If sunsetr is running, these take effect immediately.
-# If not running, they persist in the config for next start.
-sunsetr set \
-  night_temp="$NIGHT_TEMP" \
-  day_temp="$DAY_TEMP" \
-  night_gamma="$NIGHT_GAMMA" \
-  day_gamma="$DAY_GAMMA" \
-  sunset="$SUNSET" \
-  sunrise="$SUNRISE" \
-  transition_mode="$TRANSITION_MODE" \
-  transition_duration="$TRANSITION_DURATION"
+echo "Configuring Omarchy nightlight (${NIGHT_TEMP}K from ${SUNSET} to ${SUNRISE})..."
 
-echo "Nightlight configured: ${NIGHT_TEMP}K from ${SUNSET%:00} to ${SUNRISE%:00}"
-echo "Current status:"
-sunsetr status
+mkdir -p "$(dirname "$HYPRSUNSET_CONF")"
+
+# 1. Write the hyprsunset profile schedule
+cat > "$HYPRSUNSET_CONF" << EOF
+# Configured by omarchy-supplement
+# Reset to neutral/daylight at sunrise
+profile {
+    time = ${SUNRISE}
+    identity = true
+}
+
+# Apply warm color temperature at sunset
+profile {
+    time = ${SUNSET}
+    temperature = ${NIGHT_TEMP}
+}
+EOF
+
+echo "Wrote schedule to $HYPRSUNSET_CONF"
+
+# 2. Ensure hyprsunset autostarts with Hyprland
+if [ -f "$AUTOSTART_LUA" ]; then
+    MARKER='o.launch_on_start("hyprsunset")'
+    if ! grep -qF -- "$MARKER" "$AUTOSTART_LUA"; then
+        echo "" >> "$AUTOSTART_LUA"
+        echo "-- Start hyprsunset daemon for scheduled nightlight" >> "$AUTOSTART_LUA"
+        echo "$MARKER" >> "$AUTOSTART_LUA"
+        echo "Added hyprsunset to $AUTOSTART_LUA"
+    else
+        echo "hyprsunset already configured in $AUTOSTART_LUA"
+    fi
+fi
+
+# 3. Restart hyprsunset daemon to reload profiles
+if command -v omarchy &>/dev/null; then
+    omarchy restart hyprsunset 2>/dev/null || true
+fi
+
+echo "Nightlight configured: ${NIGHT_TEMP}K at ${SUNSET}, neutral at ${SUNRISE}."
+echo "Tip: You can manually toggle nightlight on/off anytime with 'omarchy toggle nightlight'."

@@ -1,38 +1,58 @@
 #!/bin/bash
-# Configures idle behavior:
-# 1. Extends the lock timeout to 30 minutes when idle is enabled.
-# 2. Sets the DEFAULT state on boot to be DISABLED entirely (no screensaver, no lock).
 
-HYPRIDLE_CONF="$HOME/.config/hypr/hypridle.conf"
-AUTOSTART_CONF="$HOME/.config/hypr/autostart.conf"
+# Configures idle behavior for Omarchy 4.x (Quattro).
+# Replaces legacy hypridle/hyprlock configs — idle detection and lock screen
+# are now handled natively by Omarchy Shell (Quickshell).
+#
+# Goals:
+# 1. Extend the idle lock timeout to 30 minutes (when idle IS enabled).
+# 2. Set the default boot state to DISABLED (stay-awake mode, no automatic lock/screensaver).
+
+set -e
+
+SHELL_JSON="$HOME/.config/omarchy/shell.json"
+AUTOSTART_LUA="$HOME/.config/hypr/autostart.lua"
 
 echo "Configuring Omarchy idle behavior..."
 
-# --- 1. SET TIMEOUT TO 30 MINUTES ---
-if [ -f "$HYPRIDLE_CONF" ]; then
-    # We use sed to replace the specific 152 second timeout for the lock listener 
-    # to 1800 seconds (30 mins).
-    sed -i 's/timeout = 152/timeout = 1800/g' "$HYPRIDLE_CONF"
-    echo "Timeout for lock updated to 1800 seconds (30 minutes)."
+# --- 1. SET IDLE TIMEOUT IN SHELL.JSON ---
+# idle.lock: seconds before screen locks (1800s = 30m)
+# idle.screensaver: seconds before screensaver activates (900s = 15m)
+if [ -f "$SHELL_JSON" ] && command -v jq &>/dev/null; then
+    tmp=$(mktemp)
+    jq '.idle.lock = 1800 | .idle.screensaver = 900' "$SHELL_JSON" > "$tmp" && mv "$tmp" "$SHELL_JSON"
+    echo "Configured idle timeouts in $SHELL_JSON (lock: 1800s, screensaver: 900s)"
+fi
+
+# --- 2. SET DEFAULT BOOT STATE TO STAY-AWAKE ---
+# Omarchy 4.x uses 'omarchy toggle idle stay-awake' to prevent automatic sleep/lock.
+if [ -f "$AUTOSTART_LUA" ]; then
+    MARKER="-- Disable idle on boot (omarchy-supplement)"
+    if ! grep -qF -- "$MARKER" "$AUTOSTART_LUA"; then
+        echo "" >> "$AUTOSTART_LUA"
+        echo "$MARKER" >> "$AUTOSTART_LUA"
+        echo 'o.launch_on_start("omarchy toggle idle stay-awake")' >> "$AUTOSTART_LUA"
+        echo "Added stay-awake autostart entry to $AUTOSTART_LUA"
+    else
+        echo "Stay-awake autostart entry already present in $AUTOSTART_LUA"
+    fi
 else
-    echo "Warning: hypridle.conf not found at $HYPRIDLE_CONF"
+    echo "Note: $AUTOSTART_LUA not found. Creating it..."
+    mkdir -p "$(dirname "$AUTOSTART_LUA")"
+    cat > "$AUTOSTART_LUA" << 'EOF'
+-- Extra autostart processes.
+o.launch_on_start("omarchy toggle idle stay-awake")
+EOF
 fi
 
-# --- 2. SET DEFAULT BOOT STATE TO DISABLED ---
-# Add a kill command to the Hyprland autostart config if it's not already there
-if ! grep -q "pkill -x hypridle" "$AUTOSTART_CONF"; then
-    echo "" >> "$AUTOSTART_CONF"
-    echo "# Disable idle lock on boot by default (Omarchy default override)" >> "$AUTOSTART_CONF"
-    echo "exec-once = bash -c 'for i in {1..20}; do if pgrep -x hypridle >/dev/null; then pkill -x hypridle; pkill -RTMIN+9 waybar; break; fi; sleep 1; done'" >> "$AUTOSTART_CONF"
-    echo "Added autostart override to disable idle daemon on boot."
+# --- 3. APPLY STAY-AWAKE STATE IMMEDIATELY ---
+if command -v omarchy-toggle-idle &>/dev/null || command -v omarchy &>/dev/null; then
+    omarchy toggle idle stay-awake 2>/dev/null || omarchy-toggle-idle stay-awake 2>/dev/null || true
+    echo "Applied stay-awake state immediately."
 fi
 
-# --- 3. APPLY DEFAULT STATE IMMEDIATELY ---
-if pgrep -x hypridle >/dev/null; then
-    echo "Killing active hypridle daemon to apply default disabled state..."
-    pkill -x hypridle
-    # Tell Waybar to update its UI icon to 'disabled'
-    pkill -RTMIN+9 waybar
-fi
-
-echo "Done! By default, idle lock is DISABLED. If you toggle it ON manually, it will wait 30 minutes before locking."
+echo ""
+echo "Done! Idle behavior configured:"
+echo "  - Idle timeout: 30 minutes (lock), 15 minutes (screensaver)"
+echo "  - Default state: STAY AWAKE (no auto-lock on boot)"
+echo "  - Manual toggle: use the bar indicator or 'omarchy toggle idle'"

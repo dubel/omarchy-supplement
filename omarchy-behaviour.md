@@ -1,36 +1,77 @@
-# Omarchy OS: Agent Knowledge Base
+# Omarchy Quattro: Agent Knowledge Base
 
-This document serves as a reference for future AI agents working on the `omarchy-supplement` repository. Omarchy is a highly customized, Hyprland-based Arch Linux environment. To ensure stability and avoid conflicts with its built-in automation, agents must adhere to the following behaviors and lessons learned.
+This document serves as a reference for future AI agents working on the `omarchy-supplement` repository when targeting **Omarchy Quattro (v4.0.0)**. Quattro is a major rewrite — many subsystems have been replaced. Agents must understand the new architecture to avoid breaking changes.
 
 ---
 
 ## 1. Core Rule: Idempotency
-All `install-*.sh` scripts in this repository **must be idempotent**. They should safely execute on a fresh machine or a machine that has run them 100 times, without duplicating configurations or breaking existing states.
+All `install-*.sh` and `configure-*.sh` scripts in this repository **must be idempotent**. They should safely execute on a fresh machine or a machine that has run them 100 times, without duplicating configurations or breaking existing states.
 
-## 2. Omarchy Built-in Scripts & Toggles
-Omarchy ships with a vast array of helper scripts (prefixed with `omarchy-`) located in `~/.local/share/omarchy/bin/`. 
-**Crucial Lesson:** Before writing custom `sed` logic to modify system configs or restart services, always check if an Omarchy helper exists!
-- Example: Disabling the Idle Lock. Instead of hacking `~/.config/hypr/hypridle.conf`, simply run `omarchy-toggle-idle`. This ensures the daemon is killed correctly and the Waybar UI is instantly updated via signals.
+## 2. Quattro Architecture Changes (vs. v3.x)
 
-## 3. Waybar Customizations
-Omarchy aggressively manages the Waybar configuration.
-- Running `omarchy-refresh-waybar` will **overwrite** any local changes by pulling down the master configuration from Omarchy's upstream repository.
-- If you write a script to surgically edit `~/.config/waybar/config.jsonc` (e.g., via Python JSON manipulation), **do not** use `refresh-waybar`. Instead, use `omarchy-restart-waybar` to cleanly restart the service and preserve local edits.
+| Subsystem | Old (v3.x) | New (Quattro) |
+|-----------|-----------|---------------|
+| **Config format** | `hyprland.conf` (`.conf` syntax) | `hyprland.lua` (Lua DSL with `o.*` API) |
+| **Status bar** | Waybar (`config.jsonc`) | Quickshell widget (configured via `shell.toml`) |
+| **Lock screen** | `hyprlock` | Shell-powered PAM lock (`omarchy-lock`) |
+| **Idle management** | `hypridle` + `hypridle.conf` | Quickshell idle plugin (configured via `shell.toml`) |
+| **Terminal (default)** | Alacritty | Foot (`foot.ini`) — Alacritty still available |
+| **Screensaver** | `terminaltexteffects` | `ttfx` (Rust port) |
+| **Nightlight** | `sunsetr` | `hyprsunset` (may coexist with sunsetr) |
+| **Autostart** | `autostart.conf` | `autostart.lua` |
+| **Theming** | 8-color palette | 24-color palette with auto-generated nvim/vscode/btop themes |
+| **Packages** | Scripts in `~/.local/share/omarchy/bin/` | System packages via pacman |
 
-## 4. Background Tasks & Sudo 
-Agents run commands in the background without interactive terminals. 
-- Using `yay` to install AUR packages (e.g., `ttf-meslo-nerd-font-powerlevel10k`) often prompts for a fingerprint or `sudo` password. 
-- Since background tasks cannot fulfill fingerprint requests, the agent will hang. Plan the scripts, test what you can, but gracefully instruct the user to run the final script manually in their Alacritty terminal.
+## 3. Omarchy Built-in Scripts & Toggles
+Omarchy ships helper scripts prefixed with `omarchy-`. In Quattro, these are installed as **system packages** (not user-local scripts).
 
-## 5. Tmux Persistence & Shell Updates
+**Crucial Lesson:** Before writing custom `sed` logic to modify system configs, always check if an Omarchy helper exists!
+- **Idle toggle:** `omarchy-toggle-idle` (replaces `pkill -x hypridle`)
+- **Lock screen:** `omarchy-lock` (replaces `hyprlock`)
+- **Nightlight:** `omarchy-restart-hyprsunset` / `omarchy-refresh-hyprsunset`
+- **Idle debug:** `omarchy-debug-idle` (new diagnostic tool)
+
+## 4. Shell Configuration (`shell.toml`)
+Quattro introduces `~/.config/omarchy/shell.toml` as the central configuration file for the Quickshell-based UI. This file is **live-watched** — changes take effect immediately without restarts.
+
+Known keys:
+- `clock_format` — bar clock display format
+- `idle_timeout` — seconds before idle triggers
+- `nightlight_temp` / `nightlight_sunset` / `nightlight_sunrise` — nightlight settings
+
+## 5. Hyprland Lua Configuration
+Quattro's Hyprland config uses a Lua DSL:
+- `o.input({...})` — input device settings
+- `o.bind("MOD", "KEY", o.exec("command"))` — keybindings
+- `o.windowrule("match:...", "action")` — window rules
+- `o.exec_once("command")` — autostart commands
+
+User overrides can be loaded with `dofile("/path/to/overrides.lua")` appended to `hyprland.lua`.
+
+## 6. Background Tasks & Sudo
+Agents run commands in the background without interactive terminals.
+- Using `yay` to install AUR packages often prompts for a fingerprint or `sudo` password.
+- Since background tasks cannot fulfill fingerprint requests, the agent will hang. Plan the scripts, but instruct the user to run the final script manually in their **Foot** terminal.
+
+## 7. Tmux Persistence & Shell Updates
 Tmux is extremely resilient. It spawns a background server that caches the environment state.
-- If you update the default shell (e.g., from `bash` to `zsh`), any existing Tmux server will continue launching `bash` because of its cached state. 
-- When updating Tmux configs (`~/.tmux.conf`), explicitly set `set-option -g default-shell /usr/bin/zsh` and remember to run `tmux kill-server` so it boots fresh on the next terminal launch.
+- If you update the default shell (e.g., from `bash` to `zsh`), any existing Tmux server will continue launching `bash`.
+- When updating Tmux configs, explicitly set `set-option -g default-shell /usr/bin/zsh` and run `tmux kill-server`.
 
-## 6. Alacritty Shell Caching
-Wayland/systemd environments often cache `$SHELL` aggressively. Even if you use `chsh -s $(which zsh)`, Alacritty might still open `bash` until a full system reboot.
-- **Fix:** Bypass the environment cache by explicitly defining the shell in `~/.config/alacritty/alacritty.toml` under the `[terminal]` block using `shell.program = "/usr/bin/zsh"`.
+## 8. Terminal Shell Caching
+Wayland/systemd environments cache `$SHELL` aggressively. Even after `chsh`, the terminal may still open `bash` until reboot.
+- **Foot fix:** Set `shell=/usr/bin/zsh` under `[main]` in `~/.config/foot/foot.ini`
+- **Alacritty fix:** Set `shell.program = "/usr/bin/zsh"` under `[terminal]` in `~/.config/alacritty/alacritty.toml`
 
-## 7. Package Managers & Runtime Environments
-- **Mise:** Omarchy uses `mise` to manage language environments (Node, Go, etc.). When installing packages via `mise` in scripts, always prefix with `MISE_HTTP_TIMEOUT=300` because default timeouts are too short and often fail during large AUR downloads.
-- **CLI Tools:** Modern tools (`eza`, `zoxide`, `bat`) are installed by default on the OS but **not configured** for the user's shell. If switching to Oh My Zsh, aliases and shell integrations for these tools must be injected manually into `~/.zshrc`.
+## 9. Package Managers & Runtime Environments
+- **Mise:** Omarchy uses `mise` to manage language environments (Node, Go, etc.). Prefix with `MISE_HTTP_TIMEOUT=300` for large downloads.
+- **CLI Tools:** Modern tools (`eza`, `zoxide`, `bat`) are installed by default but **not configured** for the user's shell. If switching to Oh My Zsh, aliases must be injected into `~/.zshrc`.
+
+## 10. Dead References (DO NOT USE)
+The following commands and files **no longer exist** in Quattro:
+- `waybar`, `omarchy-refresh-waybar`, `omarchy-restart-waybar`, `pkill -SIGUSR2 waybar`
+- `hyprlock`, `hypridle`, `hypridle.conf`
+- `hyprland.conf` (replaced by `hyprland.lua`)
+- `autostart.conf` (replaced by `autostart.lua`)
+- `terminaltexteffects` (replaced by `ttfx`)
+- `~/.local/share/omarchy/bin/` (scripts now installed as system packages)

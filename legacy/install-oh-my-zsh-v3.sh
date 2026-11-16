@@ -2,10 +2,6 @@
 
 # Automate Oh My Zsh, Powerlevel10k, and Plugins installation
 # This script sets up a modern terminal experience entirely non-interactively.
-#
-# Quattro migration notes:
-# - Added Foot terminal configuration alongside Alacritty (Foot is the new default)
-# - Font name updated for Quattro's JetBrains Mono Nerd font
 
 set -e
 
@@ -70,7 +66,7 @@ if ! grep -q "source ~/.p10k.zsh" "$ZSHRC"; then
 fi
 
 # 5. Copy pre-configured Powerlevel10k classic style config (Bypass wizard)
-REPO_P10K="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/3rdparty-assets/.p10k.zsh"
+REPO_P10K="$(pwd)/3rdparty-assets/.p10k.zsh"
 if [ -f "$REPO_P10K" ]; then
     echo "Applying classic Powerlevel10k configuration from repository..."
     cp "$REPO_P10K" "$HOME/.p10k.zsh"
@@ -78,51 +74,18 @@ else
     echo "Warning: 3rdparty-assets/.p10k.zsh not found in the repository."
 fi
 
-# 6. Configure Foot terminal (Quattro's default) for Zsh and Meslo font
-FOOT_CONF="$HOME/.config/foot/foot.ini"
-if [ -f "$FOOT_CONF" ]; then
-    echo "Configuring Foot terminal..."
-
-    # Update the font to MesloLGS NF (required for Powerlevel10k glyphs)
-    # Quattro ships JetBrains Mono Nerd Font by default
-    if grep -q "^font=" "$FOOT_CONF"; then
-        sed -i 's/^font=.*/font=MesloLGS NF:size=11/' "$FOOT_CONF"
-    elif grep -q "^\[main\]" "$FOOT_CONF"; then
-        sed -i '/^\[main\]/a font=MesloLGS NF:size=11' "$FOOT_CONF"
-    else
-        echo "" >> "$FOOT_CONF"
-        echo "[main]" >> "$FOOT_CONF"
-        echo "font=MesloLGS NF:size=11" >> "$FOOT_CONF"
-    fi
-
-    # Ensure Zsh is the default shell in Foot
-    if grep -q "^shell=" "$FOOT_CONF"; then
-        sed -i 's|^shell=.*|shell=/usr/bin/zsh|' "$FOOT_CONF"
-    elif grep -q "^\[main\]" "$FOOT_CONF"; then
-        # Add shell under [main] if not present
-        if ! grep -q "^shell=" "$FOOT_CONF"; then
-            sed -i '/^\[main\]/a shell=/usr/bin/zsh' "$FOOT_CONF"
-        fi
-    fi
-    echo "Foot terminal configured with MesloLGS NF font and Zsh."
-else
-    echo "Note: Foot config not found at $FOOT_CONF (will use defaults)."
-fi
-
-# 7. Configure Alacritty (still available as secondary terminal)
+# 6. Configure Alacritty explicitly for Zsh and Meslo font
 ALACRITTY_CONF="$HOME/.config/alacritty/alacritty.toml"
 if [ -f "$ALACRITTY_CONF" ]; then
     echo "Configuring Alacritty terminal..."
-    # Update fonts — try both the old Omarchy font and Quattro's JetBrains Mono
+    # Update fonts
     sed -i 's/family = "CaskaydiaMono Nerd Font"/family = "MesloLGS NF"/g' "$ALACRITTY_CONF"
-    sed -i 's/family = "JetBrainsMono Nerd Font"/family = "MesloLGS NF"/g' "$ALACRITTY_CONF"
-
+    
     # Ensure Zsh is the default shell
     if ! grep -q "shell.program" "$ALACRITTY_CONF"; then
         sed -i '/\[terminal\]/a shell.program = "/usr/bin/zsh"' "$ALACRITTY_CONF"
     fi
 fi
 
-echo ""
 echo "Oh My Zsh and Powerlevel10k setup complete!"
 echo "Note: The changes will take effect when you open a new terminal session."

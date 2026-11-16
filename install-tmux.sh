@@ -2,29 +2,28 @@
 
 set -e
 
-# Install tmux
-yay -S --noconfirm --needed tmux
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Check if tmux is installed
+# Install tmux if not present
 if ! command -v tmux &>/dev/null; then
-  echo "tmux installation failed."
-  exit 1
+    echo "Installing tmux..."
+    yay -S --noconfirm --needed tmux
+else
+    echo "tmux is already installed."
 fi
 
 TPM_DIR="$HOME/.tmux/plugins/tpm"
 
 # Check if TPM is already installed
 if [ -d "$TPM_DIR" ]; then
-  echo "TPM is already installed in $TPM_DIR"
+    echo "TPM is already installed in $TPM_DIR"
 else
-  echo "Installing Tmux Plugin Manager (TPM)..."
-  git clone https://github.com/tmux-plugins/tpm $TPM_DIR
+    echo "Installing Tmux Plugin Manager (TPM)..."
+    git clone https://github.com/tmux-plugins/tpm "$TPM_DIR"
 fi
 
-echo "TPM installed successfully!"
-
 echo "Applying baseline Tmux configuration..."
-cp "$(pwd)/configs/tmux/.tmux.conf" "$HOME/.tmux.conf"
+cp "$SCRIPT_DIR/configs/tmux/.tmux.conf" "$HOME/.tmux.conf"
 
 echo "Installing Tmux plugins..."
 # Run TPM's headless install script to download resurrect, continuum, etc.
@@ -46,11 +45,13 @@ if [[ -z "$TMUX" ]] && [[ -n "$PS1" ]] && [[ "$TERM_PROGRAM" != "vscode" ]]; the
 fi
 '
 
-if ! grep -q "Auto-start Tmux" "$ZSHRC"; then
-    echo "$AUTOSTART_SNIPPET" >> "$ZSHRC"
-    echo "Auto-start logic injected."
-else
-    echo "Auto-start logic already exists in $ZSHRC."
+if [ -f "$ZSHRC" ]; then
+    if ! grep -q "Auto-start Tmux" "$ZSHRC"; then
+        echo "$AUTOSTART_SNIPPET" >> "$ZSHRC"
+        echo "Auto-start logic injected."
+    else
+        echo "Auto-start logic already exists in $ZSHRC."
+    fi
 fi
 
 echo "Tmux setup complete!"
