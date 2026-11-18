@@ -26,14 +26,21 @@ fi
 # The dofile() line to inject
 DOFILE_LINE="dofile(\"$OVERRIDES_FILE\")"
 
-# Check if already injected (idempotent)
-if grep -Fq "$DOFILE_LINE" "$HYPRLAND_CONFIG"; then
+# Check if already injected (idempotent): exactly one overrides dofile(), pointing here
+if grep -Fxq "$DOFILE_LINE" "$HYPRLAND_CONFIG" \
+    && [ "$(grep -c 'hyprland-overrides\.lua' "$HYPRLAND_CONFIG")" -eq 1 ]; then
     echo "Hyprland Lua overrides already loaded in $HYPRLAND_CONFIG"
 else
     echo "Injecting dofile() into $HYPRLAND_CONFIG..."
 
     # Backup the config before modifying
     cp "$HYPRLAND_CONFIG" "${HYPRLAND_CONFIG}.backup_pre_overrides"
+
+    # Drop stale injections (e.g. old omarchy-quattro/ path) before re-adding
+    sed -i \
+        -e '/^-- User overrides (omarchy-supplement)$/d' \
+        -e '/^dofile(".*\/hyprland-overrides\.lua")$/d' \
+        "$HYPRLAND_CONFIG"
 
     # Append the dofile call at the end of the config
     echo "" >> "$HYPRLAND_CONFIG"

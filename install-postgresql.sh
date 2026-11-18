@@ -10,8 +10,9 @@ else
     echo "PostgreSQL package is already installed."
 fi
 
-# Check if data directory already exists and is initialized
-if [ ! -d "/var/lib/postgres/data" ] || [ -z "$(ls -A /var/lib/postgres/data 2>/dev/null)" ]; then
+# Check if the cluster is already initialized. /var/lib/postgres is mode 700
+# (owned by postgres), so the check must run with elevated rights.
+if ! sudo test -s /var/lib/postgres/data/PG_VERSION; then
     echo "Initializing PostgreSQL database..."
     sudo -u postgres initdb -D /var/lib/postgres/data --locale=C.UTF-8 --encoding=UTF8 --data-checksums
 else
