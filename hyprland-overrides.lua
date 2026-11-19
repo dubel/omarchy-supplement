@@ -74,3 +74,18 @@ o.rebind("SUPER + SHIFT + T", "Browser reopen closed tab", function()
     send_keys("CTRL SHIFT", "T")
   end
 end)
+
+-- SUPER + F -> Find (Ctrl+F) in any app, like macOS Cmd+F
+-- (foot uses Ctrl+Shift+R for scrollback search; Ctrl+F there is forward-char)
+o.rebind("SUPER + F", "Find (Ctrl+F)", function()
+  local window = hl.get_active_window()
+  local class = ((window and window.class) or ""):lower()
+  if class:match("foot") then
+    send_keys("CTRL SHIFT", "R")
+  else
+    send_keys("CTRL", "F")
+  end
+end)
+
+-- SUPER + CTRL + F -> Full screen in any app, like macOS Cmd+Ctrl+F
+o.rebind("SUPER + CTRL + F", "Full screen", hl.dsp.window.fullscreen({ mode = "fullscreen" }))
