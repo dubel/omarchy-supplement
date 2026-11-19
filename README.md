@@ -31,7 +31,7 @@ The `./install-all.sh` script automates setup across the following categories:
 - **Node.js:** Installs Node LTS (v20) using Omarchy's built-in `mise`.
 - **Golang:** Installs the latest version of Go using Omarchy's built-in `mise`.
 - **PostgreSQL:** Installs, initializes the data directory, enables the service, and creates a default DB/user non-interactively.
-- **Tmux:** Restores tmux configurations with TPM and auto-start logic for Zsh.
+- **Tmux:** Restores tmux configurations with TPM and auto-start logic for Zsh, and sets the terminal window title to the running program (shown in the bar as e.g. `Foot: Claude`).
 - **Hyprland Overrides:** Injects custom input configurations, touchpad gestures, and keybinds using the Omarchy 4.x Lua API (`hyprland-overrides.lua`).
 
 ### 2. Applications
@@ -54,7 +54,7 @@ Configures a **Framework 13 (AMD Ryzen AI 7 350 + Radeon 860M)** for gaming:
 
 ### 5. Desktop Customization (Omarchy 4.x)
 - **Theme:** Downloads a custom milky way wallpaper and applies the Synthwave84 Omarchy theme.
-- **Omarchy Shell Bar:** Configures top bar clock format (`d MMMM (dddd)  HH:mm`) via `omarchy bar`.
+- **Omarchy Shell Bar:** Configures top bar clock format (`d MMMM (dddd)  HH:mm`) via `omarchy bar` and adds an App name widget (`configs/omarchy-plugins/supplement.app-name`) showing the focused application's name, like the macOS menu bar, in place of the built-in Active window widget.
 - **Nightlight:** Configures `hyprsunset` for a fixed schedule (21:00 to 07:00 at 3300K warmth).
 - **Screensaver:** Configures infinite Matrix rain via `ttfx` while retaining full Omarchy cursor and dismissal handling.
 - **Idle Behavior:** Sets 30-minute lock timeout and boots into stay-awake mode.

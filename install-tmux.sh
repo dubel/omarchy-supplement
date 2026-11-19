@@ -25,6 +25,21 @@ fi
 echo "Applying baseline Tmux configuration..."
 cp "$SCRIPT_DIR/configs/tmux/.tmux.conf" "$HOME/.tmux.conf"
 
+# Terminal window title = program running in the active pane ("claude", "nvim",
+# "zsh"), so the bar's App name widget can show e.g. "Foot: Claude".
+# Omarchy's ~/.config/tmux/tmux.conf is read after ~/.tmux.conf and sets its own
+# set-titles-string ('#h:#W'), so the override is appended there.
+OMARCHY_TMUX_CONF="$HOME/.config/tmux/tmux.conf"
+TITLE_LINE="set -g set-titles-string '#{pane_current_command}'"
+if [ -f "$OMARCHY_TMUX_CONF" ]; then
+    if ! grep -qxF "$TITLE_LINE" "$OMARCHY_TMUX_CONF"; then
+        printf '\n# omarchy-supplement: window title = running program (for the bar App name widget)\n%s\n' "$TITLE_LINE" >> "$OMARCHY_TMUX_CONF"
+        echo "Tmux window title set to the running program."
+    else
+        echo "Tmux window title already set to the running program."
+    fi
+fi
+
 echo "Installing Tmux plugins..."
 # Run TPM's headless install script to download resurrect, continuum, etc.
 "$TPM_DIR/bin/install_plugins" || true

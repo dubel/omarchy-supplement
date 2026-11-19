@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "supplement.app-name",
+  "name": "App name",
+  "version": "1.0.0",
+  "author": "omarchy-supplement",
+  "description": "Name of the focused application, like the macOS menu bar",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "AppName.qml"
+  },
+  "barWidget": {
+    "displayName": "App name",
+    "description": "Name of the focused application, like the macOS menu bar",
+    "category": "Compositor",
+    "allowMultiple": false,
+    "defaultSection": "left"
+  }
+}
