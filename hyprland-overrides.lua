@@ -92,3 +92,23 @@ o.rebind("SUPER + CTRL + F", "Full screen", hl.dsp.window.fullscreen({ mode = "f
 
 -- SUPER + CTRL + SHIFT + F -> Tiled full screen (moved off SUPER + CTRL + F)
 o.rebind("SUPER + CTRL + SHIFT + F", "Tiled full screen", "omarchy-hyprland-window-tiled-fullscreen-toggle")
+
+-- SUPER + Z -> Undo (Ctrl+Z) in any app, like macOS Cmd+Z
+-- (skipped in foot, where Ctrl+Z suspends the running process)
+o.rebind("SUPER + Z", "Undo (Ctrl+Z)", function()
+  local window = hl.get_active_window()
+  local class = ((window and window.class) or ""):lower()
+  if not class:match("foot") then
+    send_keys("CTRL", "Z")
+  end
+end)
+
+-- SUPER + SHIFT + Z -> Redo (Ctrl+Shift+Z) in any app, like macOS Cmd+Shift+Z
+-- (skipped in foot, matching SUPER + Z)
+o.rebind("SUPER + SHIFT + Z", "Redo (Ctrl+Shift+Z)", function()
+  local window = hl.get_active_window()
+  local class = ((window and window.class) or ""):lower()
+  if not class:match("foot") then
+    send_keys("CTRL SHIFT", "Z")
+  end
+end)
