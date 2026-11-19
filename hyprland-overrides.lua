@@ -75,13 +75,38 @@ o.rebind("SUPER + SHIFT + T", "Browser reopen closed tab", function()
   end
 end)
 
--- SUPER + F -> Find (Ctrl+F) in any app, like macOS Cmd+F
--- (foot uses Ctrl+Shift+R for scrollback search; Ctrl+F there is forward-char)
-o.rebind("SUPER + F", "Find (Ctrl+F)", function()
+-- Same rule as Omarchy's default/hypr/bindings/clipboard.lua: a window counts as
+-- a terminal when it carries the "terminal" tag from default/hypr/apps/terminals.lua.
+-- Dynamic tags carry a trailing "*".
+local function is_terminal()
+  local window = hl.get_active_window()
+  for _, tag in ipairs((window and window.tags) or {}) do
+    if tag:gsub("%*$", "") == "terminal" then
+      return true
+    end
+  end
+  return false
+end
+
+-- Scrollback search key per terminal. Ctrl+F in a terminal is forward-char.
+-- Anything else tagged terminal (foot, org.omarchy.* / TUI.* windows opened through
+-- xdg-terminal-exec, which defaults to foot) uses foot's Ctrl+Shift+R.
+local function send_terminal_search()
   local window = hl.get_active_window()
   local class = ((window and window.class) or ""):lower()
-  if class:match("foot") then
+  if class == "alacritty" or class == "com.mitchellh.ghostty" then
+    send_keys("CTRL SHIFT", "F")
+  elseif class == "kitty" then
+    send_keys("CTRL SHIFT", "slash")
+  else
     send_keys("CTRL SHIFT", "R")
+  end
+end
+
+-- SUPER + F -> Find (Ctrl+F) in any app, like macOS Cmd+F; scrollback search in terminals
+o.rebind("SUPER + F", "Find (Ctrl+F)", function()
+  if is_terminal() then
+    send_terminal_search()
   else
     send_keys("CTRL", "F")
   end
@@ -94,21 +119,17 @@ o.rebind("SUPER + CTRL + F", "Full screen", hl.dsp.window.fullscreen({ mode = "f
 o.rebind("SUPER + CTRL + SHIFT + F", "Tiled full screen", "omarchy-hyprland-window-tiled-fullscreen-toggle")
 
 -- SUPER + Z -> Undo (Ctrl+Z) in any app, like macOS Cmd+Z
--- (skipped in foot, where Ctrl+Z suspends the running process)
+-- (skipped in terminals, where Ctrl+Z suspends the running process)
 o.rebind("SUPER + Z", "Undo (Ctrl+Z)", function()
-  local window = hl.get_active_window()
-  local class = ((window and window.class) or ""):lower()
-  if not class:match("foot") then
+  if not is_terminal() then
     send_keys("CTRL", "Z")
   end
 end)
 
 -- SUPER + SHIFT + Z -> Redo (Ctrl+Shift+Z) in any app, like macOS Cmd+Shift+Z
--- (skipped in foot, matching SUPER + Z)
+-- (skipped in terminals, matching SUPER + Z)
 o.rebind("SUPER + SHIFT + Z", "Redo (Ctrl+Shift+Z)", function()
-  local window = hl.get_active_window()
-  local class = ((window and window.class) or ""):lower()
-  if not class:match("foot") then
+  if not is_terminal() then
     send_keys("CTRL SHIFT", "Z")
   end
 end)
