@@ -89,3 +89,6 @@ end)
 
 -- SUPER + CTRL + F -> Full screen in any app, like macOS Cmd+Ctrl+F
 o.rebind("SUPER + CTRL + F", "Full screen", hl.dsp.window.fullscreen({ mode = "fullscreen" }))
+
+-- SUPER + CTRL + SHIFT + F -> Tiled full screen (moved off SUPER + CTRL + F)
+o.rebind("SUPER + CTRL + SHIFT + F", "Tiled full screen", "omarchy-hyprland-window-tiled-fullscreen-toggle")
