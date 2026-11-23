@@ -70,7 +70,7 @@ fi
 
 # 3. Install Core CLI Packages
 info "Installing Tmux and modern CLI tools..."
-brew install tmux git curl eza bat zoxide fzf dockutil
+brew install tmux git curl eza bat zoxide fzf dockutil mise
 
 # 3b. Install Alacritty via Official GitHub Release DMG
 # Note: Homebrew disabled the 'alacritty' cask due to Gatekeeper notarization rules.
@@ -177,6 +177,23 @@ fi
 perl -i -pe 's/^ZSH_THEME=.*/ZSH_THEME="powerlevel10k\/powerlevel10k"/' "$ZSHRC"
 perl -i -pe 's/^plugins=\(.*\)/plugins=(git zsh-autosuggestions zsh-syntax-highlighting web-search)/' "$ZSHRC"
 
+# PATH bootstrap at the TOP of .zshrc: Alacritty may start a non-login shell
+# (no ~/.zprofile), so brew / ~/.local/bin must be on PATH before anything
+# in .zshrc (e.g. `mise activate`) tries to use them.
+PATH_BOOTSTRAP='# >>> Omarchy PATH bootstrap >>>
+if [[ -f "/opt/homebrew/bin/brew" ]]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+elif [[ -f "/usr/local/bin/brew" ]]; then
+    eval "$(/usr/local/bin/brew shellenv)"
+fi
+export PATH="$HOME/.local/bin:$PATH"
+# <<< Omarchy PATH bootstrap <<<
+'
+
+if ! grep -q ">>> Omarchy PATH bootstrap >>>" "$ZSHRC"; then
+    { printf '%s\n' "$PATH_BOOTSTRAP"; cat "$ZSHRC"; } > "${ZSHRC}.omarchy_tmp" && mv "${ZSHRC}.omarchy_tmp" "$ZSHRC"
+fi
+
 # Add Homebrew shellenv if not already present
 BREW_INIT='
 # Homebrew path initialization
@@ -227,6 +244,18 @@ export PATH="$HOME/.local/bin:$PATH"
 
 if ! grep -q 'export PATH="$HOME/.local/bin:$PATH"' "$ZSHRC"; then
     echo "$LOCAL_BIN_PATH" >> "$ZSHRC"
+fi
+
+# mise (Omarchy's runtime manager) - activate only if installed
+MISE_INIT='
+# mise activation (Omarchy)
+if command -v mise &>/dev/null; then
+    eval "$(mise activate zsh)"
+fi
+'
+
+if ! grep -q "mise activation (Omarchy)" "$ZSHRC"; then
+    echo "$MISE_INIT" >> "$ZSHRC"
 fi
 
 # Safe Auto-start Tmux
@@ -300,7 +329,9 @@ set -g @plugin 'tmux-plugins/tmux-resurrect'
 set -g @plugin 'tmux-plugins/tmux-continuum'
 
 # Continuum settings
-set -g @continuum-restore 'on'
+# Auto-restore only once a resurrect save exists, otherwise the very first
+# tmux start shows "Tmux resurrect file not found!"
+if-shell 'test -e ~/.tmux/resurrect/last || test -e ~/.local/share/tmux/resurrect/last' "set -g @continuum-restore 'on'"
 set -g @continuum-save-interval '15'
 
 # Theme / Aesthetics (Dracula on top)
@@ -347,6 +378,7 @@ option_as_alt = "OnlyLeft"
 
 [terminal]
 shell.program = "$CURRENT_ZSH"
+shell.args = ["-l"]  # login shell, like Terminal.app (sources ~/.zprofile)
 osc52 = "CopyPaste"
 
 # Synthwave84 Color Palette (Omarchy exact match)
